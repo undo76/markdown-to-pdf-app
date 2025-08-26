@@ -45,7 +45,7 @@ pnpm format:check # Check formatting without fixing
 ### Styling
 
 - **Tailwind CSS 4.1.12** (latest v4)
-- **shadcn/ui** for component library
+- **shadcn/ui** for component library, use pnpm dlx shadcn-ui@latest add <component> to add components
 
 ### Data Management
 
@@ -116,3 +116,20 @@ src/
 - All code formatted with Prettier
 - Tests use Vitest + Testing Library
 - Git hooks enforce quality standards
+- Use always `fd` command for file searching instead of `find`
+- Use context7 tools for checking out documentation and snippets
+- Use a single file per component
+- Make it modular and small components
+- Use shadcn/ui for UI components
+- Use strict typing in TypeScript, avoid `any`
+
+## Specific Task Instructions
+
+Your job is to port markdown-paper.html to this repository in next.js and maintain the repository.
+
+Make a commit and push your changes after every single file edit.
+
+Use the .agent/ directory as a scratchpad for your work. Store long term plans and todo lists there.
+
+The original project was mostly tested by manually running the code. When porting, you will need to write end to end and unit tests for the project. But make sure to spend most of your time on the actual porting, not on the testing. A good heuristic is to spend 80% of your time on the actual porting, and 20% on the
+testing.
