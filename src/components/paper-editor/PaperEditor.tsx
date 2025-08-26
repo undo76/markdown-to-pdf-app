@@ -8,11 +8,6 @@ import {
   processCaptions,
   processFootnotes,
   enumerateHeadings,
-  PaperConfig,
-  Citation,
-  Caption,
-  Footnote,
-  Heading,
 } from '@/lib/markdown';
 import { MarkdownRenderer } from './MarkdownRenderer';
 
@@ -33,18 +28,9 @@ export const PaperEditor: React.FC<PaperEditorProps> = ({
   initialContent = '',
   onContentChange,
 }) => {
-  const [content, setContent] = useState<string>(initialContent);
+  const [, setContent] = useState<string>(initialContent);
   const [pages, setPages] = useState<PaperPage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [config, setConfig] = useState<PaperConfig>({
-    columns: 2,
-    padding: '20mm',
-    hyphens: true,
-    cornellSize: '0',
-    fontSize: '9pt',
-    fontFamily: `'CMU Serif', Georgia, serif`,
-    textAlign: 'justify',
-  });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const marked = configureMarked();
@@ -60,15 +46,15 @@ export const PaperEditor: React.FC<PaperEditorProps> = ({
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = htmlContent;
 
-        // Extract configuration
-        const extractedConfig = extractConfig(tempDiv);
-        setConfig(extractedConfig);
+        // Extract configuration (will be used in future implementations)
+        extractConfig(tempDiv);
 
         // Process citations, captions, footnotes, and headings
-        const citations = processCitations(tempDiv);
-        const captions = processCaptions(tempDiv);
-        const footnotes = processFootnotes(tempDiv);
-        const headings = enumerateHeadings(tempDiv);
+        // These will be used in future implementations for advanced features
+        processCitations(tempDiv);
+        processCaptions(tempDiv);
+        processFootnotes(tempDiv);
+        enumerateHeadings(tempDiv);
 
         // For now, create a simple single page
         // In a real implementation, this would handle pagination, columns, etc.
