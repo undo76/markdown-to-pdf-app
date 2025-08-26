@@ -120,3 +120,352 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Paper Editor Styles */
+.paper-editor {
+  --paper-bg-color: #fff;
+  --main-bg-color: #ccc;
+  --paper-width: 210mm;
+  --paper-height: 297mm;
+  --font-annotation-size: 0.8rem;
+  --border-hint: 1px solid #c2c2c2;
+  --border-radius: 0.2rem;
+  --paper-padding: 20mm;
+  --cornell-space: 0mm;
+  --column-count: 2;
+  --font-family: 'CMU Serif', Georgia, serif;
+  --font-size: 9pt;
+  --text-align: justify;
+  --hyphens: auto;
+}
+
+.paper-editor-body {
+  background: var(--main-bg-color);
+  width: 100%;
+  min-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family);
+  font-size: var(--font-size);
+}
+
+.paper-pages {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+  margin: 2rem auto;
+}
+
+.paper-page {
+  flex: none;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: var(--paper-width);
+  height: var(--paper-height);
+  padding: 0 var(--paper-padding);
+  background: var(--paper-bg-color);
+  box-shadow: 0px 0px 32px -8px #0008;
+  overflow: hidden;
+}
+
+.paper-page-header,
+.paper-page-footer {
+  position: relative;
+  flex: none;
+  display: flex;
+  justify-content: center;
+  height: var(--paper-padding);
+  font-size: var(--font-annotation-size);
+  opacity: 66%;
+}
+
+.paper-page-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  min-height: 0;
+  height: 100%;
+}
+
+.paper-page-no {
+  position: absolute;
+  right: 0rem;
+}
+
+.paper-page-header .paper-page-no {
+  bottom: 0rem;
+}
+
+.paper-page-footer .paper-page-no {
+  top: 0rem;
+}
+
+.paper-page-columns {
+  min-height: 0;
+  height: 100%;
+  column-count: var(--column-count);
+  column-gap: 2rem;
+  column-fill: auto;
+  padding-right: var(--cornell-space);
+}
+
+.paper-page-columns > * {
+  break-inside: avoid;
+}
+
+.paper-page-columns > *:first-child,
+.paper-page-columns > *:first-child > *:first-child,
+.paper-page-columns > *:first-child > *:first-child > *:first-child,
+.paper-page-columns > *:first-child > *:first-child > *:first-child > *:first-child {
+  margin-top: 0;
+}
+
+.paper-file-picker {
+  border: 5px dashed #1C6EA4;
+  border-radius: 2rem;
+  cursor: pointer;
+}
+
+.column-break {
+  break-before: column;
+  margin: 0;
+}
+
+@media print {
+  .paper-editor-body {
+    background: var(--paper-bg-color);
+  }
+
+  .paper-pages {
+    display: block;
+    margin: 0;
+  }
+
+  .paper-page {
+    box-shadow: none;
+    break-inside: avoid;
+  }
+}
+
+/* Markdown Styles */
+.paper-markdown p {
+  hyphens: var(--hyphens);
+  text-align: var(--text-align);
+}
+
+.paper-markdown blockquote p,
+.paper-markdown code p,
+.paper-markdown a,
+.paper-markdown .ref-foot p,
+.paper-markdown .ref-cap p,
+.paper-markdown .ref-cit-list p {
+  text-align: unset;
+  hyphens: unset;
+}
+
+.paper-markdown .ref-foot p,
+.paper-markdown .ref-cit-content p {
+  margin: 0;
+}
+
+.paper-markdown h1,
+.paper-markdown h2,
+.paper-markdown h3,
+.paper-markdown h4,
+.paper-markdown h5,
+.paper-markdown h6 {
+  margin: 2rem 0 0 0;
+  break-after: avoid;
+}
+
+.paper-markdown h1 {
+  text-align: center;
+  font-size: 3.0rem;
+}
+
+.paper-markdown h2 {
+  font-size: 1.8rem;
+}
+
+.paper-markdown h3 {
+  font-size: 1.5rem;
+}
+
+.paper-markdown h4 {
+  font-size: 1.3rem;
+}
+
+.paper-markdown h5 {
+  font-size: 1.1rem;
+}
+
+.paper-markdown h6 {
+  font-size: 1.0rem;
+}
+
+.paper-markdown a {
+  hyphens: unset;
+  font-style: italic;
+  color: inherit;
+  text-decoration: inherit;
+}
+
+.paper-markdown ul,
+.paper-markdown ol {
+  padding-inline-start: 2rem;
+}
+
+.paper-markdown img {
+  object-fit: contain;
+  margin: auto;
+  width: 100%;
+  max-width: 100%;
+  border-radius: var(--border-radius);
+}
+
+.paper-markdown table {
+  margin: 0 auto;
+  border: none;
+  border-collapse: collapse;
+}
+
+.paper-markdown td {
+  padding: 0 0.6rem;
+  border-left: 1px solid #000;
+}
+
+.paper-markdown tr {
+  border-bottom: var(--border-hint);
+}
+
+.paper-markdown thead {
+  border-bottom: 1px solid #000;
+}
+
+.paper-markdown table td:first-child {
+  border-left: none;
+}
+
+.paper-markdown pre {
+  font-size: var(--font-annotation-size);
+  display: block;
+}
+
+.paper-markdown code {
+  display: inline;
+  padding: 0 0.3rem;
+  font-size: var(--font-annotation-size);
+  border: var(--border-hint);
+  border-radius: var(--border-radius);
+}
+
+.paper-markdown pre code {
+  padding: 1rem;
+  width: 100%;
+  display: inline-block;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.paper-markdown blockquote {
+  font-style: italic;
+  border-top: var(--border-hint);
+  border-bottom: var(--border-hint);
+}
+
+/* Markdown Extensions */
+.paper-markdown .ref-cit-link,
+.paper-markdown .ref-cap-link,
+.paper-markdown .ref-foot-link {
+  font-style: unset;
+  text-decoration: underline;
+}
+
+.paper-markdown .ref-cap-wrapper {
+  margin: 1rem 0;
+  break-inside: avoid;
+}
+
+.paper-markdown .ref-cap {
+  opacity: 66%;
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.paper-markdown .ref-cap-key {
+  font-weight: bold;
+  text-wrap: nowrap;
+}
+
+.paper-markdown .ref-cap-content * {
+  font-style: italic;
+}
+
+.paper-markdown .ref-cit-list {
+  break-inside: avoid;
+}
+
+.paper-markdown .ref-cit-list table {
+  border-collapse: separate;
+  border-spacing: 0.5rem;
+  font-size: var(--font-annotation-size);
+}
+
+.paper-markdown .ref-cit-list td,
+.paper-markdown .ref-cit-list tr {
+  border: none;
+  padding: 0;
+  font-size: var(--font-annotation-size);
+}
+
+.paper-markdown .ref-cit-key {
+  vertical-align: text-top;
+}
+
+.paper-markdown .ref-foot {
+  opacity: 66%;
+  font-size: var(--font-annotation-size);
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+}
+
+.paper-markdown .ref-foot-link {
+  font-size: 0.6rem;
+}
+
+.paper-markdown .toc-list {
+  padding-left: 1rem;
+}
+
+.paper-markdown .toc-item {
+  width: 100%;
+  display: flex;
+  gap: .5rem;
+  align-items: baseline;
+  padding: 0.125rem 0rem;
+}
+
+.paper-markdown .toc-item-dots {
+  flex: 1 1 auto;
+  border-bottom: 1px dotted;
+}
+
+.paper-markdown .mxgraph,
+.paper-markdown .mxgraph svg {
+  width: 100% !important;
+  height: unset !important;
+  min-width: unset !important;
+  min-height: unset !important;
+}
+
+.paper-markdown .mxgraph svg {
+  background-size: contain;
+}
+
+.paper-markdown .geAdaptiveAsset {
+  display: none;
+}
