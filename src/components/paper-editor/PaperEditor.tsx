@@ -1,10 +1,20 @@
 'use client';
 
-import React, { useState, useCallback, useRef } from 'react';
-import { marked } from 'marked';
-import { markedHighlight } from 'marked-highlight';
-import hljs from 'highlight.js';
-import 'highlight.js/styles/default.css';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
+import {
+  configureMarked,
+  extractConfig,
+  processCitations,
+  processCaptions,
+  processFootnotes,
+  enumerateHeadings,
+  PaperConfig,
+  Citation,
+  Caption,
+  Footnote,
+  Heading,
+} from '@/lib/markdown';
+import { MarkdownRenderer } from './MarkdownRenderer';
 
 interface PaperPage {
   id: string;
@@ -23,50 +33,62 @@ export const PaperEditor: React.FC<PaperEditorProps> = ({
   initialContent = '',
   onContentChange,
 }) => {
-  const [, setContent] = useState<string>(initialContent);
+  const [content, setContent] = useState<string>(initialContent);
   const [pages, setPages] = useState<PaperPage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [config, setConfig] = useState<PaperConfig>({
+    columns: 2,
+    padding: '20mm',
+    hyphens: true,
+    cornellSize: '0',
+    fontSize: '9pt',
+    fontFamily: `'CMU Serif', Georgia, serif`,
+    textAlign: 'justify',
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Configure marked with highlight.js using marked-highlight
-  marked.use(
-    markedHighlight({
-      langPrefix: 'hljs language-',
-      highlight(code: string, lang: string) {
-        const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-        return hljs.highlight(code, { language }).value;
-      },
-    })
+  const marked = configureMarked();
+
+  const processMarkdown = useCallback(
+    async (markdownContent: string) => {
+      setIsLoading(true);
+      try {
+        // Parse markdown to HTML
+        const htmlContent = marked.parse(markdownContent);
+
+        // Create a temporary div to process the HTML content
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = htmlContent;
+
+        // Extract configuration
+        const extractedConfig = extractConfig(tempDiv);
+        setConfig(extractedConfig);
+
+        // Process citations, captions, footnotes, and headings
+        const citations = processCitations(tempDiv);
+        const captions = processCaptions(tempDiv);
+        const footnotes = processFootnotes(tempDiv);
+        const headings = enumerateHeadings(tempDiv);
+
+        // For now, create a simple single page
+        // In a real implementation, this would handle pagination, columns, etc.
+        const newPage: PaperPage = {
+          id: 'page-1',
+          header: <div>Header</div>,
+          footer: <div>Footer</div>,
+          content: <MarkdownRenderer htmlContent={tempDiv.innerHTML} />,
+          pageNumber: 1,
+        };
+
+        setPages([newPage]);
+      } catch (error) {
+        console.error('Error processing markdown:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [marked]
   );
-
-  const processMarkdown = useCallback(async (markdownContent: string) => {
-    setIsLoading(true);
-    try {
-      // Parse markdown to HTML
-      const htmlContent = marked.parse(markdownContent);
-
-      // For now, create a simple single page
-      // In a real implementation, this would handle pagination, columns, etc.
-      const newPage: PaperPage = {
-        id: 'page-1',
-        header: <div>Header</div>,
-        footer: <div>Footer</div>,
-        content: (
-          <div
-            className="paper-markdown"
-            dangerouslySetInnerHTML={{ __html: htmlContent }}
-          />
-        ),
-        pageNumber: 1,
-      };
-
-      setPages([newPage]);
-    } catch (error) {
-      console.error('Error processing markdown:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
 
   const handleContentChange = useCallback(
     (newContent: string) => {
@@ -117,7 +139,7 @@ export const PaperEditor: React.FC<PaperEditorProps> = ({
   }, []);
 
   // Process initial content on mount
-  React.useEffect(() => {
+  useEffect(() => {
     if (initialContent) {
       processMarkdown(initialContent);
     }
@@ -144,13 +166,18 @@ export const PaperEditor: React.FC<PaperEditorProps> = ({
                 type="file"
                 accept=".md,text/markdown,text/plain"
                 onChange={handleFileUpload}
+                aria-label="file upload"
               />
             </div>
           </div>
         ) : (
           <div className="paper-pages">
             {pages.map((page) => (
-              <div key={page.id} className="paper-page">
+              <div
+                key={page.id}
+                className="paper-page"
+                data-testid="paper-page"
+              >
                 <div className="paper-page-header">
                   {page.header}
                   <p className="paper-page-no">{page.pageNumber}</p>

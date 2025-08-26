@@ -1,28 +1,9 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { PaperEditor } from '@/components/paper-editor';
 import { describe, it, expect, vi } from 'vitest';
 
-// Mock the marked library
-vi.mock('marked', () => ({
-  setOptions: vi.fn(),
-  parse: vi.fn().mockReturnValue('<p>Test content</p>'),
-}));
-
-// Mock marked-highlight
-vi.mock('marked-highlight', () => ({
-  markedHighlight: vi.fn().mockReturnValue({}),
-}));
-
-// Mock highlight.js
-vi.mock('highlight.js', () => ({
-  getLanguage: vi.fn().mockReturnValue(true),
-  highlight: vi.fn().mockReturnValue({ value: '<code>highlighted</code>' }),
-}));
-
-// Mock CSS imports
-vi.mock('highlight.js/styles/default.css', () => ({}));
-
-describe('PaperEditor', () => {
+describe('PaperEditor Component', () => {
   it('renders file picker when no content is provided', () => {
     render(<PaperEditor />);
 
@@ -30,46 +11,66 @@ describe('PaperEditor', () => {
     expect(screen.getByText('Or click to pick')).toBeInTheDocument();
   });
 
-  it('renders initial content when provided', () => {
-    const initialContent = '# Test Title\n\nTest content';
+  it('renders initial content when provided', async () => {
+    const initialContent = '# Test Heading\n\nThis is test content.';
     render(<PaperEditor initialContent={initialContent} />);
 
-    // The content should be processed and rendered
-    expect(screen.getByText('Test Title')).toBeInTheDocument();
-  });
-
-  it('handles file upload via click', () => {
-    render(<PaperEditor />);
-
-    const filePicker = screen.getByText('Or click to pick');
-    fireEvent.click(filePicker);
-
-    // The file input should be triggered
-    // This test mainly ensures the click handler doesn't throw errors
-    expect(filePicker).toBeInTheDocument();
-  });
-
-  it('handles drag and drop events', () => {
-    render(<PaperEditor />);
-
-    const dropZone = screen
-      .getByText('Drag and drop your markdown')
-      .closest('.paper-file-picker');
-
-    // Test drag over
-    fireEvent.dragOver(dropZone!);
-
-    // Test drop with mock file
-    const mockFile = new File(['# Test content'], 'test.md', {
-      type: 'text/markdown',
-    });
-    fireEvent.drop(dropZone!, {
-      dataTransfer: {
-        files: [mockFile],
-      },
+    await waitFor(() => {
+      expect(
+        screen.getByRole('heading', { name: /test heading/i })
+      ).toBeInTheDocument();
     });
 
-    // The component should handle the drop event without errors
-    expect(dropZone).toBeInTheDocument();
+    expect(screen.getByText('This is test content.')).toBeInTheDocument();
+  });
+
+  it('handles file upload via click', async () => {
+    const user = userEvent.setup();
+    const fileContent = '# Uploaded File\n\nThis content was uploaded.';
+    const file = new File([fileContent], 'test.md', { type: 'text/markdown' });
+
+    render(<PaperEditor />);
+
+    const fileInput = screen.getByLabelText('file upload') as HTMLInputElement;
+
+    await user.upload(fileInput, file);
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('heading', { name: /uploaded file/i })
+      ).toBeInTheDocument();
+    });
+
+    expect(screen.getByText('This content was uploaded.')).toBeInTheDocument();
+  });
+
+  it('calls onContentChange when content changes via file upload', async () => {
+    const user = userEvent.setup();
+    const onContentChange = vi.fn();
+    const fileContent = '# Uploaded Content';
+    const file = new File([fileContent], 'test.md', { type: 'text/markdown' });
+
+    render(<PaperEditor onContentChange={onContentChange} />);
+
+    const fileInput = screen.getByLabelText('file upload') as HTMLInputElement;
+
+    await user.upload(fileInput, file);
+
+    await waitFor(() => {
+      expect(onContentChange).toHaveBeenCalledWith(fileContent);
+    });
+  });
+
+  it('renders with proper paper styling', async () => {
+    const initialContent = '# Test Paper';
+    render(<PaperEditor initialContent={initialContent} />);
+
+    await waitFor(() => {
+      const paperPage = screen.getByTestId('paper-page');
+      expect(paperPage).toBeInTheDocument();
+      // The CSS variables should be set, but the actual computed styles
+      // might not be available in the test environment
+      expect(paperPage).toHaveClass('paper-page');
+    });
   });
 });
